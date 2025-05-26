@@ -1,0 +1,37 @@
+# Suspicious DNS Activity Filters
+
+# Failed DNS queries
+dns.flags.rcode != 0
+
+# Suspicious TLDs commonly used by malware
+dns.qry.name contains ".tk" or dns.qry.name contains ".ml" or dns.qry.name contains ".ga" or dns.qry.name contains ".cf"
+
+# DGA pattern (16+ character random subdomain)
+dns.qry.name matches "^[a-z0-9]{16,}\.(com|net|org)$"
+
+# Excessive DNS queries from single source
+# (Manual analysis needed - look for high frequency)
+
+# DNS queries to suspicious domains
+dns.qry.name contains "bit.ly" or dns.qry.name contains "tinyurl" or dns.qry.name contains "pastebin"
+
+# DNS responses with private IPs (possible DNS poisoning)
+dns.a == 192.168.0.0/16 or dns.a == 10.0.0.0/8 or dns.a == 172.16.0.0/12
+
+# DNS over non-standard ports
+dns and not udp.port == 53
+
+# Long DNS query names (possible tunneling)
+dns.qry.name.len > 100
+
+# TXT record queries (often used for C2)
+dns.qry.type == 16
+
+# Reverse DNS lookups for suspicious IPs
+dns.ptr
+
+# DNS queries for recently registered domains
+# (Requires external threat intel correlation)
+
+# Fast flux DNS patterns
+dns.count.answers > 5

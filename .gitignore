@@ -1,0 +1,78 @@
+# PCAP Analysis Project .gitignore
+
+# PCAP files (too large for git)
+*.pcap
+*.pcapng
+*.cap
+
+# Temporary analysis files
+*.tmp
+analysis_report_*.md
+analysis_report_*.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+env/
+ENV/
+.env
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Screenshots (unless specifically needed)
+screenshots/*.png
+screenshots/*.jpg
+
+# Logs
+*.log
+logs/
+
+# Jupyter Notebooks
+.ipynb_checkpoints
+
+# Test coverage
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Credentials and sensitive data
+config.ini
+secrets.json
+*.key
+*.pem

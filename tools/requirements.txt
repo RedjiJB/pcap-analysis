@@ -1,0 +1,36 @@
+# PCAP Analysis Requirements
+
+# Core packet analysis
+scapy>=2.4.5
+pyshark>=0.5.3
+
+# Data analysis and visualization
+pandas>=1.5.0
+numpy>=1.21.0
+matplotlib>=3.5.0
+seaborn>=0.11.0
+
+# Network analysis
+netaddr>=0.8.0
+python-whois>=0.7.3
+
+# Cryptography and encoding
+cryptography>=3.4.8
+base64
+
+# System and file operations
+python-magic>=0.4.24
+
+# Testing framework
+pytest>=7.0.0
+pytest-cov>=4.0.0
+
+# Code quality
+flake8>=5.0.0
+black>=22.0.0
+
+# Documentation
+sphinx>=5.0.0
+
+# Optional: Machine learning for anomaly detection
+scikit-learn>=1.1.0

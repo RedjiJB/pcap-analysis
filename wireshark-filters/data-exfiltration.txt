@@ -1,0 +1,34 @@
+# Data Exfiltration Detection Filters
+
+# Large outbound transfers from internal network
+tcp.len > 1000 and ip.src == 192.168.0.0/16
+
+# DNS tunneling (long queries)
+dns.qry.name.len > 50
+
+# Suspicious DNS query patterns (possible DGA)
+dns.qry.name matches "^[a-z0-9]{16,}\."
+
+# HTTPS to suspicious/uncommon ports
+ssl.handshake.type == 1 and not (tcp.dstport == 443 or tcp.dstport == 993 or tcp.dstport == 995)
+
+# FTP data transfers
+ftp-data
+
+# Large uploads via HTTP POST
+http.request.method == "POST" and tcp.len > 5000
+
+# Email with large attachments
+smtp and tcp.len > 10000
+
+# Unusual protocols on standard ports
+not http and tcp.dstport == 80
+
+# Base64 encoded data in HTTP
+http contains "base64" or http contains "data:image"
+
+# Compressed files in HTTP traffic
+http.content_type contains "zip" or http.content_type contains "rar" or http.content_type contains "7z"
+
+# Cloud storage uploads
+http.host contains "dropbox" or http.host contains "onedrive" or http.host contains "drive.google"
