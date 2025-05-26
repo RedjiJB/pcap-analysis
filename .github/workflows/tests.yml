@@ -1,0 +1,132 @@
+name: PCAP Analysis Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Cache pip packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('tools/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libpcap-dev tshark
+    
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r tools/requirements.txt
+        pip install pytest pytest-cov flake8 black
+    
+    - name: Lint with flake8
+      run: |
+        # Stop the build if there are Python syntax errors or undefined names
+        flake8 scripts --count --select=E9,F63,F7,F82 --show-source --statistics
+        # Exit-zero treats all errors as warnings
+        flake8 scripts --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    
+    - name: Format check with black
+      run: |
+        black --check scripts tests
+    
+    - name: Run unit tests
+      run: |
+        pytest tests/test_pcap_analyzer.py tests/test_dns_anomaly_detector.py tests/test_extract_credentials.py -v
+    
+    - name: Run integration tests
+      run: |
+        pytest tests/test_integration.py -v
+    
+    - name: Run performance tests
+      run: |
+        pytest tests/test_performance.py -v -m "not slow"
+    
+    - name: Run all tests with coverage
+      run: |
+        pytest --cov=scripts --cov-report=xml --cov-report=html
+    
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v3
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+    
+    - name: Archive coverage report
+      uses: actions/upload-artifact@v3
+      with:
+        name: coverage-report
+        path: htmlcov/
+    
+    - name: Test script execution
+      run: |
+        python scripts/pcap_analyzer.py --help
+        python scripts/dns_anomaly_detector.py --help
+        python scripts/extract_credentials.py --help
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Run Bandit security scan
+      uses: gaurav-nelson/bandit-action@v1
+      with:
+        path: "scripts/"
+    
+    - name: Run Safety check
+      run: |
+        pip install safety
+        safety check -r tools/requirements.txt
+
+  build-docs:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Validate Markdown files
+      run: |
+        npm install -g markdownlint-cli
+        markdownlint '**/*.md' --ignore node_modules
+
+  validate-filters:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+    
+    - name: Install dependencies
+      run: |
+        pip install pytest
+    
+    - name: Validate Wireshark filters
+      run: |
+        pytest tests/test_filters.py -v
